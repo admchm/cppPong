@@ -44,13 +44,28 @@ public:
 	}
 };
 
+class GameInstance
+{
+public:
+	int playerScore;
+	int opponentScore;
+	bool quit;
+
+	GameInstance()
+	{
+		playerScore = 0;
+		opponentScore = 0;
+		quit = false;
+	}
+};
+
 SDL_Window* createWindow(const int& xWinPos, const int& yWinPos, const int& xRes, const int& yRes,
 						SDL_Window* window);
 
 SDL_Renderer* createRenderer(SDL_Window*, SDL_Renderer*);
-void gameLogic(const int&, const int&, SDL_Renderer*, Player*, Opponent*, Pong*);
-void rendering(SDL_Renderer*, const int&, Player*, Opponent*, Pong*);
-void clean(Player*, Opponent*, Pong*);
+void gameLogic(const int&, const int&, SDL_Renderer*, Player*, Opponent*, Pong*, GameInstance*);
+void rendering(SDL_Renderer*, const int&, Player*, Opponent*, Pong*, GameInstance*);
+void clean(Player*, Opponent*, Pong*, GameInstance*);
 
 int main(int argc, char **argv)
 {
@@ -65,6 +80,7 @@ int main(int argc, char **argv)
 	SDL_Renderer* renderer = nullptr;
 	renderer = createRenderer(window, renderer);
 
+	GameInstance* gameInstance = new GameInstance;
 	Player* player = new Player;
 	Opponent* opponent = new Opponent;
 	Pong* pong = new Pong;
@@ -74,7 +90,7 @@ int main(int argc, char **argv)
 	auto done = false;
 	SDL_Event event;
 
-	while (!done)
+	while (!gameInstance->quit)
 	{
 		while (SDL_PollEvent(&event))
 		{
@@ -84,16 +100,15 @@ int main(int argc, char **argv)
 				player->yValPlayer = event.motion.y - 50;
 				break;
 			case SDL_QUIT:
-				done = true;
+				gameInstance->quit;
 				break;
 			}
 		}
-			gameLogic(xRes, yRes, renderer, player, opponent, pong);
-			rendering(renderer, xRes, player, opponent, pong);
-
+			gameLogic(xRes, yRes, renderer, player, opponent, pong, gameInstance);
+			rendering(renderer, xRes, player, opponent, pong, gameInstance);
 	}
 
-	clean(player, opponent, pong);
+	clean(player, opponent, pong, gameInstance);
 	SDL_Quit();
 	return 0;
 }
@@ -112,7 +127,7 @@ SDL_Renderer* createRenderer(SDL_Window* window, SDL_Renderer* renderer)
 	return renderer = SDL_CreateRenderer(window, -1, 0); // window, index, flags
 }
 
-void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player* player, Opponent* opponent, Pong* pong)
+void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player* player, Opponent* opponent, Pong* pong, GameInstance *gameInstance)
 {
 
 	pong->xValPong += pong->xPongV;	// movement
@@ -125,9 +140,9 @@ void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player*
 	if (pong->xValPong < 0 && pong->xPongV < 0)
 	{
 		pong->xPongV *= -1;
-		if (pong->yValPong < player->yValPlayer || pong->yValPong > player->yValPlayer + 50)
+		if (pong->yValPong < player->yValPlayer || pong->yValPong > player->yValPlayer + 100)
 		{
-			// ++aiScore;
+			++gameInstance->opponentScore;
 			pong->xValPong = xRes / 2;
 			pong->yValPong = yRes / 2;
 		}
@@ -136,46 +151,79 @@ void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player*
 	if (pong->xValPong > xRes && pong->xPongV > 0)
 	{
 		pong->xPongV *= -1;
-		if (pong->yValPong < opponent->yValOpponent || pong->yValPong > opponent->yValOpponent + 50)
+		if (pong->yValPong < opponent->yValOpponent || pong->yValPong > opponent->yValOpponent + 100)
 		{
-			// ++playerScore
+			++gameInstance->playerScore;
 			pong->xValPong = xRes / 2;
 			pong->yValPong = yRes / 2;
 		}
 	}
+	if (opponent->yValOpponent + 50 < pong->yValPong)
+	{
+		opponent->yValOpponent += 4;
+	}
+	else
+	{
+		opponent->yValOpponent -= 4;
+	}
 }
 
-void rendering(SDL_Renderer* renderer, const int& xRes, Player* player, Opponent* opponent, Pong* pong)
+void rendering(SDL_Renderer* renderer, const int& xRes, Player* player, Opponent* opponent, Pong* pong, GameInstance* gameInstance)
 {
-	
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+
+	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 0);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 
 	SDL_Rect rect;
-	rect.x = 15;
+	rect.x = -1;
 	rect.y = player->yValPlayer;
 	rect.w = 5;
-	rect.h = 50;
+	rect.h = 100;
 	SDL_RenderFillRect(renderer, &rect);
 
-	rect.x = xRes - 15;
+	rect.x = xRes - 3;
 	rect.y = opponent->yValOpponent;
 	rect.w = 5;
-	rect.h = 50;
+	rect.h = 100;
 	SDL_RenderFillRect(renderer, &rect);
 
 	rect.x = pong->xValPong - 5;
 	rect.y = pong->yValPong - 5;
-	rect.w = 5;
-	rect.h = 5;
+	rect.w = 10;
+	rect.h = 10;
 	SDL_RenderFillRect(renderer, &rect);
 
+	// score
+
+	for (auto i = 0; i < gameInstance->playerScore; ++i)
+	{
+		rect.x = 100 + i * 20;
+		rect.y = 50;
+		SDL_RenderFillRect(renderer, &rect);
+	}
+
+	for (auto i = 0; i < gameInstance->opponentScore; ++i)
+	{
+		rect.x = xRes - 100 + i * 20;
+		rect.y = 50;
+		SDL_RenderFillRect(renderer, &rect);
+	}
+
 	SDL_RenderPresent(renderer);
+
+	if (gameInstance->playerScore == 3 || gameInstance->opponentScore == 3)
+	{
+		gameInstance->quit = true;
+	}
 }
 
-void clean(Player* player, Opponent* opponent, Pong* pong)
+void clean(Player* player, Opponent* opponent, Pong* pong, GameInstance *gameInstance)
 {
+	if (gameInstance != NULL)
+	{
+		delete gameInstance;
+	}
 	delete player;
 	delete opponent;
 	delete pong;
