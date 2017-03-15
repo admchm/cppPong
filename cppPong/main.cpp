@@ -65,6 +65,8 @@ int main(int argc, char **argv)
 	Opponent *opponent = new Opponent;
 	Pong *pong = new Pong;
 
+	auto currentTick = SDL_GetTicks() / 17;
+
 	auto done = false;
 	SDL_Event event;
 
@@ -75,16 +77,22 @@ int main(int argc, char **argv)
 			switch (event.type) {
 			
 			case SDL_MOUSEMOTION:
-				// add the event
+				player->yValPlayer = event.motion.y - 50;
 				break;
 			case SDL_QUIT:
 				done = true;
 				break;
 			}
 		}
-
-		gameLogic(xRes, yRes, renderer, player, opponent, pong);
-		rendering(renderer, xRes, player, opponent, pong);
+		
+		/*(auto oldTick = currentTick;
+		currentTick = SDL_GetTicks() / 17;
+		while (oldTick < currentTick)
+		{*/
+			gameLogic(xRes, yRes, renderer, player, opponent, pong);
+			//++oldTick;
+			rendering(renderer, xRes, player, opponent, pong);
+		//}
 	}
 
 	clean(player, opponent, pong);
@@ -108,6 +116,7 @@ SDL_Renderer* createRenderer(SDL_Window *window, SDL_Renderer *renderer)
 
 void gameLogic(const int &xRes, const int &yRes, SDL_Renderer *renderer, Player *player, Opponent *opponent, Pong *pong)
 {
+	// auto currentTick = SDL_GetTicks() / 17;
 
 	pong->xValPong = xRes / 2;
 	pong->yValPong = yRes / 2;
