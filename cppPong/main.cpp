@@ -32,11 +32,15 @@ class Pong
 public:
 	int xValPong;
 	int yValPong;
+	int xPongV;
+	int yPongV;
 
 	Pong()
 	{
 		xValPong = 0;
 		yValPong = 0;
+		xPongV = 5;
+		yPongV = 5;
 	}
 };
 
@@ -84,15 +88,9 @@ int main(int argc, char **argv)
 				break;
 			}
 		}
-		
-		/*(auto oldTick = currentTick;
-		currentTick = SDL_GetTicks() / 17;
-		while (oldTick < currentTick)
-		{*/
 			gameLogic(xRes, yRes, renderer, player, opponent, pong);
-			//++oldTick;
 			rendering(renderer, xRes, player, opponent, pong);
-		//}
+
 	}
 
 	clean(player, opponent, pong);
@@ -116,23 +114,17 @@ SDL_Renderer* createRenderer(SDL_Window* window, SDL_Renderer* renderer)
 
 void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player* player, Opponent* opponent, Pong* pong)
 {
-	// auto currentTick = SDL_GetTicks() / 17;
 
-	pong->xValPong = xRes / 2;
-	pong->yValPong = yRes / 2;
-	auto xPongV = 3;
-	auto yPongV = 3;
+	pong->xValPong += pong->xPongV;	// movement
+	pong->yValPong += pong->yPongV;
 
-	pong->xValPong += xPongV;	// movement
-	pong->yValPong += yPongV;
-
-	if (pong->yValPong < 0 && yPongV < 0) { yPongV *= -1; }		// is ball flying
+	if (pong->yValPong < 0 && pong->yPongV < 0) { pong->yPongV *= -1; }		// is ball flying
 	
-	if (pong->yValPong > yRes && yPongV > 0) { yPongV *= -1; }	// vertical movement
+	if (pong->yValPong > yRes && pong->yPongV > 0) { pong->yPongV *= -1; }	// vertical movement
 	
-	if (pong->xValPong < 0 && xPongV < 0)
+	if (pong->xValPong < 0 && pong->xPongV < 0)
 	{
-		xPongV *= -1;
+		pong->xPongV *= -1;
 		if (pong->yValPong < player->yValPlayer || pong->yValPong > player->yValPlayer + 50)
 		{
 			// ++aiScore;
@@ -141,9 +133,9 @@ void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player*
 		}
 	}
 
-	if (pong->xValPong > xRes && xPongV > 0)
+	if (pong->xValPong > xRes && pong->xPongV > 0)
 	{
-		xPongV *= -1;
+		pong->xPongV *= -1;
 		if (pong->yValPong < opponent->yValOpponent || pong->yValPong > opponent->yValOpponent + 50)
 		{
 			// ++playerScore
