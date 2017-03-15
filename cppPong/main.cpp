@@ -43,10 +43,10 @@ public:
 SDL_Window* createWindow(const int& xWinPos, const int& yWinPos, const int& xRes, const int& yRes,
 						SDL_Window* window);
 
-SDL_Renderer* createRenderer(SDL_Window *window, SDL_Renderer *);
-void gameLogic(const int &xRes, const int &yRes, SDL_Renderer *renderer, Player *player, Opponent *opponent, Pong *pong);
-void rendering(SDL_Renderer *renderer, const int &xRes, Player *player, Opponent *opponent, Pong *pong);
-void clean(Player *player, Opponent *opponent, Pong *pong);
+SDL_Renderer* createRenderer(SDL_Window*, SDL_Renderer*);
+void gameLogic(const int&, const int&, SDL_Renderer*, Player*, Opponent*, Pong*);
+void rendering(SDL_Renderer*, const int&, Player*, Opponent*, Pong*);
+void clean(Player*, Opponent*, Pong*);
 
 int main(int argc, char **argv)
 {
@@ -61,9 +61,9 @@ int main(int argc, char **argv)
 	SDL_Renderer* renderer = nullptr;
 	renderer = createRenderer(window, renderer);
 
-	Player *player = new Player;
-	Opponent *opponent = new Opponent;
-	Pong *pong = new Pong;
+	Player* player = new Player;
+	Opponent* opponent = new Opponent;
+	Pong* pong = new Pong;
 
 	auto currentTick = SDL_GetTicks() / 17;
 
@@ -109,12 +109,12 @@ SDL_Window* createWindow(const int& xWinPos, const int& yWinPos, const int& xRes
 	return window = SDL_CreateWindow("cpp_pong", xWinPos, yWinPos, xRes, yRes, SDL_WINDOW_BORDERLESS);
 }
 
-SDL_Renderer* createRenderer(SDL_Window *window, SDL_Renderer *renderer)
+SDL_Renderer* createRenderer(SDL_Window* window, SDL_Renderer* renderer)
 {
 	return renderer = SDL_CreateRenderer(window, -1, 0); // window, index, flags
 }
 
-void gameLogic(const int &xRes, const int &yRes, SDL_Renderer *renderer, Player *player, Opponent *opponent, Pong *pong)
+void gameLogic(const int& xRes, const int& yRes, SDL_Renderer* renderer, Player* player, Opponent* opponent, Pong* pong)
 {
 	// auto currentTick = SDL_GetTicks() / 17;
 
@@ -153,7 +153,7 @@ void gameLogic(const int &xRes, const int &yRes, SDL_Renderer *renderer, Player 
 	}
 }
 
-void rendering(SDL_Renderer *renderer, const int &xRes, Player *player, Opponent *opponent, Pong *pong)
+void rendering(SDL_Renderer* renderer, const int& xRes, Player* player, Opponent* opponent, Pong* pong)
 {
 	
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
@@ -180,12 +180,9 @@ void rendering(SDL_Renderer *renderer, const int &xRes, Player *player, Opponent
 	SDL_RenderFillRect(renderer, &rect);
 
 	SDL_RenderPresent(renderer);
-
-	// SDL_RenderPresent(renderer);
-
 }
 
-void clean(Player *player, Opponent *opponent, Pong *pong)
+void clean(Player* player, Opponent* opponent, Pong* pong)
 {
 	delete player;
 	delete opponent;
